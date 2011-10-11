@@ -22,9 +22,9 @@ Testing support was woven into the Rails fabric from the beginning. It wasn't an
 
 h4. The Three Environments
 
-Every Rails application you build has 3 sides: a side for production, a side for development, and a side for testing.
+Every Rails application you build has three environments: production, development, and test.
 
-One place you'll find this distinction is in the +config/database.yml+ file. This YAML configuration file has 3 different sections defining 3 unique database setups:
+One place you'll find this distinction is in the +config/database.yml+ file. This YAML configuration file has three different sections defining three unique database setups:
 
 * production
 * development
@@ -32,13 +32,13 @@ One place you'll find this distinction is in the +config/database.yml+ file. Thi
 
 This allows you to set up and interact with test data without any danger of your tests altering data from your production environment.
 
-For example, suppose you need to test your new +delete_this_user_and_every_everything_associated_with_it+ function. Wouldn't you want to run this in an environment where it makes no difference if you destroy data or not?
+For example, suppose you need to test your new +delete_this_user_and_every_everything_associated_with_it+ method.  Clearly, this should be run in an environment with experimental data.
 
-When you do end up destroying your testing database (and it will happen, trust me), you can rebuild it from scratch according to the specs defined in the development database. You can do this by running +rake db:test:prepare+.
+If you destroy your test database, you can rebuild it from scratch by running +rake db:test:prepare+.
 
-h4. Rails Sets up for Testing from the Word Go
+h4. Rails Sets up for Testing from the Word "Go!"
 
-Rails creates a +test+ folder for you as soon as you create a Rails project using +rails new+ _application_name_. If you list the contents of this folder then you shall see:
+Rails creates a +test+ folder when create a Rails project using +rails new _application_name_+.  Listing the contents of this folder, we see:
 
 <shell>
 $ ls -F test/
@@ -46,7 +46,7 @@ $ ls -F test/
 fixtures/       functional/     integration/    test_helper.rb  unit/
 </shell>
 
-The +unit+ folder is meant to hold tests for your models, the +functional+ folder is meant to hold tests for your controllers, and the +integration+ folder is meant to hold tests that involve any number of controllers interacting. Fixtures are a way of organizing test data; they reside in the +fixtures+ folder. The +test_helper.rb+ file holds the default configuration for your tests.
+The +unit+ folder should contain tests for models, the +functional+ folder contains tests for controllers, and the +integration+ folder contains tests that involve any number of controllers interacting. Fixtures organize test data (see below); they reside in the +fixtures+ folder. The +test_helper.rb+ file is code common to all tests, to keep them DRY.
 
 h4. The Low-Down on Fixtures
 
@@ -54,34 +54,34 @@ For good tests, you'll need to give some thought to setting up test data. In Rai
 
 h5. What are Fixtures?
 
-_Fixtures_ is a fancy word for sample data. Fixtures allow you to populate your testing database with predefined data before your tests run. Fixtures are database independent and assume a single format: *YAML*.
+_Fixtures_ is a fancy word for sample data. Fixtures populate your testing database with predefined data before your tests run. Fixtures are database independent and assume a single format: *YAML*.
 
 You'll find fixtures under your +test/fixtures+ directory. When you run +rails generate model+ to create a new model, fixture stubs will be automatically created and placed in this directory.
 
 h5. YAML
 
-YAML-formatted fixtures are a very human-friendly way to describe your sample data. These types of fixtures have the *.yml* file extension (as in +users.yml+).
+*YAML* formatted fixtures are a very human-friendly way to describe your sample data. These types of fixtures have the *.yml* file extension, for example +users.yml+.
 
-Here's a sample YAML fixture file:
+A sample YAML fixture file:
 
 <yaml>
-# lo & behold!  I am a YAML comment!
+# YAML comments begin with an hash symbol.
 david:
- name: David Heinemeier Hansson
- birthday: 1979-10-15
- profession: Systems development
+  name: David Heinemeier Hansson
+  birthday: 1979-10-15
+  profession: Systems development
 
 steve:
- name: Steve Ross Kellock
- birthday: 1974-09-27
- profession: guy with keyboard
+  name: Steve Ross Kellock
+  birthday: 1974-09-27
+  profession: guy with keyboard
 </yaml>
 
-Each fixture is given a name followed by an indented list of colon-separated key/value pairs. Records are separated by a blank space. You can place comments in a fixture file by using the # character in the first column.
+Each fixture is given a name followed by an indented list of colon-separated key/value pairs. Fixtures are separated by a blank line. You can place comments in a fixture file by using the # character in the first column.
 
 h5. ERB'in It Up
 
-ERB allows you to embed ruby code within templates. YAML fixture format is pre-processed with ERB when you load fixtures. This allows you to use Ruby to help you generate some sample data.
+ERB allows you to embed Ruby code within templates. Each YAML fixture file is pre-processed by ERB when you load fixtures. Therefore, Ruby can help generate sample data.
 
 <erb>
 <% earth_size = 20 %>
@@ -102,13 +102,14 @@ Anything encased within the
 
 <erb>
 <% %>
+<%= %>
 </erb>
 
-tag is considered Ruby code. When this fixture is loaded, the +size+ attribute of the three records will be set to 20/50, 20/2, and 20-69 respectively. The +brightest_on+ attribute will also be evaluated and formatted by Rails to be compatible with the database.
+tags is considered Ruby code. When this fixture file is loaded, the +size+ attribute of the three records will be set to 20/50, 20/2, and 20-69 respectively. The +brightest_on+ attribute will also be evaluated and formatted by Rails to be compatible with the database.
 
 h5. Fixtures in Action
 
-Rails by default automatically loads all fixtures from the +test/fixtures+ folder for your unit and functional test. Loading involves three steps:
+By default, Rails automatically loads all fixtures from the +test/fixtures+ folder for your unit and functional tests. Loading fixtures involves three steps:
 
 * Remove any existing data from the table corresponding to the fixture
 * Load the fixture data into the table
@@ -126,7 +127,7 @@ users(:david)
 users(:david).id
 </ruby>
 
-Fixtures can also transform themselves into the form of the original class. Thus, you can get at the methods only available to that class.
+Fixtures can also transform themselves into the form of the original class. Thus, you may access methods only available to that class.
 
 <ruby>
 # using the find method, we grab the "real" david as a User
@@ -140,11 +141,11 @@ h3. Unit Testing your Models
 
 In Rails, unit tests are what you write to test your models.
 
-For this guide we will be using Rails _scaffolding_. It will create the model, a migration, controller and views for the new resource in a single operation. It will also create a full test suite following Rails best practices. I will be using examples from this generated code and will be supplementing it with additional examples where necessary.
+This guide uses Rails _scaffolding_.  A _scaffold_ will create the model, a migration, controller and views for a new resource in a single operation. It will also create a full test suite following Rails best practices. Examples from this generated code will be supplemented with additional examples where necessary.
 
 NOTE: For more information on Rails <i>scaffolding</i>, refer to "Getting Started with Rails":getting_started.html
 
-When you use +rails generate scaffold+, for a resource among other things it creates a test stub in the +test/unit+ folder:
+When you use +rails generate scaffold+ for a resource, among other things it creates a test stub in the +test/unit+ folder:
 
 <shell>
 $ rails generate scaffold post title:string body:text
@@ -168,13 +169,13 @@ class PostTest < ActiveSupport::TestCase
 end
 </ruby>
 
-A line by line examination of this file will help get you oriented to Rails testing code and terminology.
+A line by line examination of this file will introduce you to Rails testing code and terminology.
 
 <ruby>
 require 'test_helper'
 </ruby>
 
-As you know by now, +test_helper.rb+ specifies the default configuration to run our tests. This is included with all the tests, so any methods added to this file are available to all your tests.
+The file +test_helper.rb+ specifies the default configuration to run our tests. It is included by all tests, so methods added to this file are available to all your tests.
 
 <ruby>
 class PostTest < ActiveSupport::TestCase
@@ -182,7 +183,7 @@ class PostTest < ActiveSupport::TestCase
 
 The +PostTest+ class defines a _test case_ because it inherits from +ActiveSupport::TestCase+. +PostTest+ thus has all the methods available from +ActiveSupport::TestCase+. You'll see those methods a little later in this guide.
 
-Any method defined within a +Test::Unit+ test case that begins with +test+ (case sensitive) is simply called a test. So, +test_password+, +test_valid_password+ and +testValidPassword+ all are legal test names and are run automatically when the test case is run.
+Any method defined within a +Test::Unit+ test case that begins with +test+ (case sensitive) is simply called a test. So, +test_password+, +test_valid_password+ and +testValidPassword+ all are legal test names. Each test is run automatically when the test case is run.
 
 Rails adds a +test+ method that takes a test name and a block. It generates a normal +Test::Unit+ test with method names prefixed with +test_+. So,
 
@@ -200,7 +201,7 @@ def test_the_truth
 end
 </ruby>
 
-only the +test+ macro allows a more readable test name. You can still use regular method definitions though.
+with the +test+ macro merely providing a more readable test name. However, you may still use regular method definitions.
 
 NOTE: The method name is generated by replacing spaces with underscores. The result does not need to be a valid Ruby identifier though, the name may contain punctuation characters etc. That's because in Ruby technically any string may be a method name. Odd ones need +define_method+ and +send+ calls, but formally there's no restriction.
 
@@ -215,11 +216,11 @@ This line of code is called an _assertion_. An assertion is a line of code that 
 * does this line of code throw an exception?
 * is the user's password greater than 5 characters?
 
-Every test contains one or more assertions. Only when all the assertions are successful will the test pass.
+Every test contains one or more assertions. The test passes when all the assertions are true.
 
 h4. Preparing your Application for Testing
 
-Before you can run your tests, you need to ensure that the test database structure is current. For this you can use the following rake commands:
+Before you can run your tests, you need to ensure the test database structure is current. For this you can use the following rake commands:
 
 <shell>
 $ rake db:migrate
@@ -227,7 +228,7 @@ $ rake db:migrate
 $ rake db:test:load
 </shell>
 
-The +rake db:migrate+ above runs any pending migrations on the _development_ environment and updates +db/schema.rb+. The +rake db:test:load+ recreates the test database from the current +db/schema.rb+. On subsequent attempts, it is a good idea to first run +db:test:prepare+, as it first checks for pending migrations and warns you appropriately.
+The +rake db:migrate+ command runs any pending migrations from the _development_ environment and updates +db/schema.rb+. The +rake db:test:load+ recreates the test database from the current +db/schema.rb+. On subsequent attempts, it is a good idea to first run +db:test:prepare+, as it first checks for pending migrations and warns you appropriately.
 
 NOTE: +db:test:prepare+ will fail with an error if +db/schema.rb+ doesn't exist.
 
@@ -257,7 +258,7 @@ Finished in 0.023513 seconds.
 1 tests, 1 assertions, 0 failures, 0 errors
 </shell>
 
-This will run all the test methods from the test case. Note that +test_helper.rb+ is in the +test+ directory, hence this directory needs to be added to the load path using the +-I+ switch.
+This will run all the +test_*+ methods from the test case. Note +test_helper.rb+ is in the +test/+ directory, hence this directory needs to be added to the load path using the +-I+ switch.
 
 You can also run a particular test method from the test case by using the +-n+ switch with the +test method name+.
 
@@ -299,7 +300,7 @@ test_should_not_save_post_without_title(PostTest) [/test/unit/post_test.rb:6]:
 1 tests, 1 assertions, 1 failures, 0 errors
 </shell>
 
-In the output, +F+ denotes a failure. You can see the corresponding trace shown under +1)+ along with the name of the failing test. The next few lines contain the stack trace followed by a message which mentions the actual value and the expected value by the assertion. The default assertion messages provide just enough information to help pinpoint the error. To make the assertion failure message more readable, every assertion provides an optional message parameter, as shown here:
+In the output, +F+ denotes a failure. You can see the corresponding trace shown under +1)+ along with the name of the failing test. The next few lines contain the stack trace followed by a message which mentions the actual value and the value expected by the assertion. The default assertion messages provide just enough information to help pinpoint the error. To make the assertion failure message more informative, every assertion provides an optional message parameter, as shown here:
 
 <ruby>
 test "should not save post without title" do
@@ -308,7 +309,7 @@ test "should not save post without title" do
 end
 </ruby>
 
-Running this test shows the friendlier assertion message:
+Running this test shows the more helpful assertion message:
 
 <shell>
   1) Failure:
@@ -317,7 +318,7 @@ Saved the post without a title.
 <false> is not true.
 </shell>
 
-Now to get this test to pass we can add a model level validation for the _title_ field.
+Now for this test to pass we can add a model level validation for the _title_ field.
 
 <ruby>
 class Post < ActiveRecord::Base
@@ -337,9 +338,9 @@ Finished in 0.193608 seconds.
 1 tests, 1 assertions, 0 failures, 0 errors
 </shell>
 
-Now, if you noticed, we first wrote a test which fails for a desired functionality, then we wrote some code which adds the functionality and finally we ensured that our test passes. This approach to software development is referred to as _Test-Driven Development_ (TDD).
+Now, if you noticed, we first wrote a test which fails for a desired functionality, then we wrote some code which adds the functionality and finally we ensured our test passes. This approach to software development is referred to as _Test Driven Development_ (TDD).
 
-TIP: Many Rails developers practice _Test-Driven Development_ (TDD). This is an excellent way to build up a test suite that exercises every part of your application. TDD is beyond the scope of this guide, but one place to start is with "15 TDD steps to create a Rails application":http://andrzejonsoftware.blogspot.com/2007/05/15-tdd-steps-to-create-rails.html.
+TIP: Many Rails developers practice _Test Driven Development_ (TDD). This is an excellent way to build up a test suite that exercises every part of your application. TDD is beyond the scope of this guide, but one place to start is with "15 TDD steps to create a Rails application":http://andrzejonsoftware.blogspot.com/2007/05/15-tdd-steps-to-create-rails.html.
 
 To see how an error gets reported, here's a test containing an error:
 
